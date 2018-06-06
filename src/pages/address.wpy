@@ -1,0 +1,93 @@
+<template>
+    <view class="{{currentPage==0?'':'hidden'}}">
+        <addressList :addressList.sync="addressList" @currentPage.user="getCurrentPage"></addressList>
+    </view>
+    <view class="{{currentPage==1?'':'hidden'}}">
+        <addressAdd @currentPage.user="getCurrentPage"></addressAdd>
+    </view>
+    <view class="{{currentPage==2?'':'hidden'}}">
+        <addressEdit @currentPage.user="getCurrentPage" ></addressEdit>
+    </view>
+</template>
+<script>
+    import wepy from 'wepy';
+    import AddressList from "../components/common/addressList";
+    import AddressAdd from "../components/common/addressAdd";
+    import AddressEdit from "../components/common/addressEdit";
+    import api from "../api/api";
+    import tip from '../utils/tip';
+
+    export default class Address extends wepy.page {
+        config = {
+            navigationBarTitleText: '地址管理',
+        }
+        components = {
+            addressList: AddressList,
+            addressAdd: AddressAdd,
+            addressEdit: AddressEdit
+        }
+        data = {
+            addressList: [
+            ],
+            editInfo:{},
+            //显示当前组件 0 列表 1新增 2编辑
+            currentPage: 0,
+            type: "",
+            //哪个页面跳转过来的
+            token: ''
+        }
+
+        async getUserAddress(token) {
+            let that = this;
+            const res = await api.getAddress({ query: {token: token} });
+
+            if(res.data.status == '200'){
+                this.addressList=res.data.data;
+                this.$invoke("addressList","refreshList", this.addressList);
+            } else {
+                tip.error('addressErr')
+            }
+            that.showLoading = false;
+        }
+        async editAddress(data) {
+            this.editInfo = data;
+            this.$invoke("addressEdit","refresh", this.editInfo);
+        }
+
+        onLoad(option) {
+            let token =  wepy.getStorageSync('token')
+            this.token = token
+            this.currentPage = 0;
+            this.getUserAddress(token);
+            this.type = (option.type==undefined?"":option.type);
+            this.$invoke("addressList","setOrgType", this.type);
+        }
+
+        onShow(){
+        }
+        computed = {
+
+        }
+        methods = {
+            getCurrentPage(num, data) {
+                this.currentPage = num;
+                if (num!=1&&num!=0) {
+                    this.editAddress(data);
+                }
+            }
+        }
+        onUnload() {
+        }
+        events = {
+            refreshAddressList(msg){
+                this.getUserAddress(this.token);
+            }
+        }
+    }
+
+</script>
+<style lang="less">
+    .hidden {
+        display: none;
+    }
+</style>

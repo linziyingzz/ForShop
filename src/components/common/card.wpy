@@ -1,0 +1,73 @@
+<template>
+  <view class="m-one-card {{ caid.CAid == list.CAid? 'm-active' : '' }} {{list.Carstatus==2?'m-disable':''}} " catchtap="clickCard({{list}})" >
+    <view class="m-modal-left">
+      <view class="m-price">{{list.COcut}}</view>
+      <view class="instruction">{{list.COuse}}</view>
+    </view>
+    <view class="m-modal-left">
+      <view class="m-time">{{list.COstart}}</view>
+      <view class="m-time">至{{list.COend}}</view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy';
+  import api from '../../api/api'
+  import tip from '../../utils/tip'
+  export default class Card extends wepy.component{
+    props = {
+      list:{
+        type:Object,
+        default:null,
+        twoWay:true
+      },
+        caid: {
+            type:Object,
+            default:null,
+            twoWay:true
+        }
+    }
+    data = {
+      _click:false
+    }
+    onLoad(){
+    }
+
+    methods = {
+      clickCard(v){
+          if(this._click == false){
+              this._click = true;
+              this.$emit('cardTap',v)
+          }else{
+              this._click = false;
+              this.$emit('cardTap',v)
+          }
+      }
+    }
+  }
+</script>
+<style scoped lang="less" rel="stylesheet/less">
+  @import "../../styles/common";
+  .m-one-card{
+    border: 1px solid @border-color;
+    border-radius: 5px;
+    margin: 40rpx;
+    padding: 40rpx;
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-around;
+    &.m-active{
+      border: 1px solid #f4690c;
+    }
+    &.m-disable{
+      color: @border-color;
+    }
+    .instruction {
+      font-size: 20rpx;
+    }
+    .m-time {
+      font-size: 28rpx;
+    }
+  }
+</style>
